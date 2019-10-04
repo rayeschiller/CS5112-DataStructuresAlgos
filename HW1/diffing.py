@@ -26,16 +26,26 @@ class DiffingCell:
 # Input: a dynamic programming table,  cell index i and j, the input strings s and t, and a cost function cost.
 # Should return a DiffingCell which we will place at (i,j) for you.
 def fill_cell(table, i, j, s, t, cost):
-    # If the index of the same letters are the same don't change it bc its 0
-    # add a dash at the beginning of each string to form the - table
     s = "-" + s
     t = "-" + t
-    # print i
-    # print j 
-    # print s 
-    # print t
-    print_table(table._table)
-    return DiffingCell(s[i], t[j] , costfunc(s[i], t[j]))
+    if (i == 0 and j == 0 ) or (i == 0 and j == 1) or (j == 0 and i == 1):
+        return DiffingCell(s[i], t[j], costfunc(s[i], t[j]))
+    if (i == 0):
+        cellLeft = table.get(i, j-1).cost
+        return DiffingCell(s[i], t[j], cellLeft + costfunc(s[i], t[j]))
+    if (j == 0):
+        cellUp = table.get(i-1, j).cost
+        return DiffingCell(s[i], t[j], cellUp + costfunc(s[i], t[j]))
+    else:
+        cellLeft = table.get(i, j-1).cost
+        cellUp = table.get(i-1, j).cost
+        cellDiag = table.get(i-1, j-1).cost
+        costDashUp = costfunc(s[0], t[j])
+        costDashLeft = costfunc(s[i], t[0])
+        costSelf = costfunc(s[i], t[j])
+        minimum = min(cellLeft + costDashUp, cellDiag + costSelf, cellUp + costDashLeft)
+        return DiffingCell(s[i], t[j] , minimum)
+    return DiffingCell(s[i], t[j] , minimum)
 
 # Input: n and m, represents the sizes of s and t respectively.
 # Should return a list of (i,j) tuples, in the order you would like fill_cell to be called
@@ -80,8 +90,7 @@ if __name__ == "__main__":
     import dynamic_programming
     s = "acb"
     t = "baa"
-    D = dynamic_programming.DynamicProgramTable(len(s) + 1, len(t) + 1, cell_ordering(len(s), len(t)), fill_cell)
-    # print "table is " + D.get(0,1)
+    D = dynamic_programming.DynamicProgramTable(len(s) + 1, len(t) + 1, cell_ordering(len(s), len(t)), fill_cell, print_table)
     D.fill(s = s, t = t, cost=costfunc)
     (cost, align_s, align_t) = diff_from_table(s,t, D)
     print align_s
