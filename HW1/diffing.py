@@ -28,22 +28,22 @@ class DiffingCell:
 def fill_cell(table, i, j, s, t, cost):
     s = "-" + s
     t = "-" + t
+    currentCost = costfunc(s[i], t[j])
     if (i == 0 and j == 0 ) or (i == 0 and j == 1) or (j == 0 and i == 1):
-        return DiffingCell(s[i], t[j], costfunc(s[i], t[j]))
+        return DiffingCell(s[i], t[j], currentCost)
     if (i == 0):
         cellLeft = table.get(i, j-1).cost
-        return DiffingCell(s[i], t[j], cellLeft + costfunc(s[i], t[j]))
+        return DiffingCell(s[i], t[j], cellLeft + currentCost)
     if (j == 0):
         cellUp = table.get(i-1, j).cost
-        return DiffingCell(s[i], t[j], cellUp + costfunc(s[i], t[j]))
+        return DiffingCell(s[i], t[j], cellUp + currentCost)
     else:
         cellLeft = table.get(i, j-1).cost
         cellUp = table.get(i-1, j).cost
         cellDiag = table.get(i-1, j-1).cost
         costDashUp = costfunc(s[0], t[j])
         costDashLeft = costfunc(s[i], t[0])
-        costSelf = costfunc(s[i], t[j])
-        minimum = min(cellLeft + costDashUp, cellDiag + costSelf, cellUp + costDashLeft)
+        minimum = min(cellLeft + costDashUp, cellDiag + currentCost, cellUp + costDashLeft)
         return DiffingCell(s[i], t[j] , minimum)
     return DiffingCell(s[i], t[j] , minimum)
 
@@ -58,6 +58,7 @@ def cell_ordering(n,m):
 # See instructions.pdf for more information on align_s and align_t.
 def diff_from_table(s, t, table):
     # TODO: YOUR CODE HERE
+    print_table(table._table)
     return (0, "", "")
 
 def print_table(table):
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     import dynamic_programming
     s = "acb"
     t = "baa"
-    D = dynamic_programming.DynamicProgramTable(len(s) + 1, len(t) + 1, cell_ordering(len(s), len(t)), fill_cell, print_table)
+    D = dynamic_programming.DynamicProgramTable(len(s) + 1, len(t) + 1, cell_ordering(len(s), len(t)), fill_cell)
     D.fill(s = s, t = t, cost=costfunc)
     (cost, align_s, align_t) = diff_from_table(s,t, D)
     print align_s
