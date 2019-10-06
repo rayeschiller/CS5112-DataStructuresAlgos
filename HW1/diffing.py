@@ -28,24 +28,32 @@ class DiffingCell:
 def fill_cell(table, i, j, s, t, cost):
     s = "-" + s
     t = "-" + t
-    currentCost = costfunc(s[i], t[j])
-    if (i == 0 and j == 0 ) or (i == 0 and j == 1) or (j == 0 and i == 1):
+    if (i == 0 and j == 0):
+        return DiffingCell(s[i], t[j], 0)
+    currentCost = cost(s[i], t[j])
+    if (i == 0 and j == 1) or (j == 0 and i == 1):
         return DiffingCell(s[i], t[j], currentCost)
-    if (i == 0):
-        cellLeft = table.get(i, j-1).cost
-        return DiffingCell(s[i], t[j], cellLeft + currentCost)
-    if (j == 0):
-        cellUp = table.get(i-1, j).cost
-        return DiffingCell(s[i], t[j], cellUp + currentCost)
+    elif (i == 0):
+        return DiffingCell(s[i], t[j], table.get(i, j-1).cost + currentCost)
+    elif (j == 0):
+        return DiffingCell(s[i], t[j], table.get(i-1, j).cost + currentCost)
     else:
         cellLeft = table.get(i, j-1).cost
         cellUp = table.get(i-1, j).cost
         cellDiag = table.get(i-1, j-1).cost
-        costDashUp = costfunc(s[0], t[j])
-        costDashLeft = costfunc(s[i], t[0])
-        minimum = min(cellLeft + costDashUp, cellDiag + currentCost, cellUp + costDashLeft)
-        return DiffingCell(s[i], t[j] , minimum)
-    return DiffingCell(s[i], t[j] , minimum)
+        costDashUp = cost(s[0], t[j])
+        costDashLeft = cost(s[i], t[0])
+        optionLeft = cellLeft + costDashUp
+        optionCurrent = cellDiag + currentCost
+        optionUp = cellUp + costDashLeft
+        # minimum = min(optionLeft, optionCurrent, optionUp)
+        if (optionCurrent <= optionLeft) and (optionCurrent <= optionUp):
+            return DiffingCell(s[i], t[j] , optionCurrent)
+        elif (optionLeft <= optionCurrent and optionLeft <= optionUp):
+            return DiffingCell(s[0], t[j] , optionLeft)
+        elif (optionUp <= optionCurrent and optionUp <= optionLeft):
+            return DiffingCell(s[i], t[0] , optionUp)
+    return DiffingCell(s[i], t[j] , 0)
 
 # Input: n and m, represents the sizes of s and t respectively.
 # Should return a list of (i,j) tuples, in the order you would like fill_cell to be called
@@ -57,12 +65,26 @@ def cell_ordering(n,m):
 # align_s and align_t are strings of the same length demonstrating the alignment.
 # See instructions.pdf for more information on align_s and align_t.
 def diff_from_table(s, t, table):
-    # TODO: YOUR CODE HERE
-    print_table(table._table)
-    return (0, "", "")
+    s_align = ""
+    t_align = ""
+    i, j =  len(s), len(t)
+    cost = table.get(i,j).cost
+    while i > 0 or j > 0:
+        currentCell = table.get(i, j)
+        currentS = currentCell.s_char
+        currentT = currentCell.t_char
+        if (currentS != '-' and currentT != '-'):
+            i -= 1
+            j -= 1
+        elif (currentS == '-' and currentT != '-'):
+            j -= 1
+        elif (currentT == '-' and currentS != '-'):
+            i -= 1
+        s_align = currentS + s_align
+        t_align = currentT + t_align
+    return (cost, s_align, t_align)
 
 def print_table(table):
-    print("-----")
     for row in table:
         print(row)    
 
